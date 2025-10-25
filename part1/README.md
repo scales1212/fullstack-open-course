@@ -1,0 +1,1 @@
+Section holds excercises and notes for 1.1-1.2 sections of the full stack course, focusing on basic JS and React.

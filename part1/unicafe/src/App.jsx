@@ -8,19 +8,48 @@ const Header = (props) => {
   )
 }
 
-const Display = (props) => {
-  return (
-    <div>
-      <p>{props.category} {props.value}</p>
-    </div>
-  )
-}
-
 const Button = (props) => {
   return (
     <div>
       <button onClick={props.onClick}> {props.category}</button>
     </div>
+  )
+}
+
+const StatisticLine = (props) => {
+  return (
+      <tr>
+        <td>{props.text}</td>
+        <td>{props.value}</td>
+      </tr>
+  )
+}
+
+const Statistics = (props) => {
+  const goodSum = props.good;
+  const badSum = props.bad * -1;
+  const all = props.good + props.bad + props.neutral;
+  const avgValue = (goodSum + badSum)/all;
+
+  if (all == 0) {
+    return (
+      <div>
+        <p>No feedback given</p>
+      </div>
+    )
+  }
+
+  return (
+      <table>
+        <tbody>
+          <StatisticLine text="good" value={props.good}/>
+          <StatisticLine text="neutral" value={props.neutral}/>
+          <StatisticLine text="bad" value={props.bad}/>
+          <StatisticLine text="all" value={all}/>
+          <StatisticLine text="average" value={avgValue}/>
+          <StatisticLine text="positive" value={(props.good/all)*100 + '%'}/>
+        </tbody>
+      </table>
   )
 }
 
@@ -33,23 +62,16 @@ const App = () => {
   const header1 = "give feedback"
   const header2 = "statistics"
 
-  const goodSum = good;
-  const badSum = bad * -1;
-  const all = good + bad + neutral;
-  const avgValue = (goodSum + badSum)/all;
   return (
     <div>
       <Header name={header1}/>
-      <Button category="good" onClick={()=>{setGood(good+1)}}/>
-      <Button category="neutral" onClick={()=>{setNeutral(neutral+1)}}/>
-      <Button category="bad" onClick={()=>{setBad(bad+1)}}/>
+      <div style={{display: 'flex', gap: '5px'}}>
+        <Button category="good" onClick={()=>{setGood(good+1)}}/>
+        <Button category="neutral" onClick={()=>{setNeutral(neutral+1)}}/>
+        <Button category="bad" onClick={()=>{setBad(bad+1)}}/>
+      </div>
       <Header name={header2}/>
-      <Display category="good" value={good}/>
-      <Display category="neutral" value={neutral}/>
-      <Display category="bad" value={bad}/>
-      <Display category="all" value={all}/>
-      <Display category="average" value={avgValue}/>
-      <Display category="positive" value={(good/all)*100 + '%'}/>
+      <Statistics good={good} bad={bad} neutral={neutral}/>
     </div>
   )
 }

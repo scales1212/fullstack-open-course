@@ -3,6 +3,7 @@ import axios from 'axios'
 import Person from './components/Person'
 import Filter from './components/Filter'
 import AddName from './components/AddName'
+import pbService from './services/phonebook'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -11,27 +12,51 @@ const App = () => {
   const [searchName, setSearchName] = useState('')
 
   useEffect (() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-      })
+    pbService.getAll().then(response => {
+      setPersons(response.data)
+    })
   }, [])
 
   const addName = (event) => {
     event.preventDefault()
+    const newPerson = {
+      name: newName,
+      number: newNumber
+    }
     const names = persons.map(person => person.name)
     if (names.includes(newName)) {
-      window.alert(`${newName} is already added to phonebook`)
-    } else {
-      const newPerson = {
-        name: newName,
-        number: newNumber
+      const updatePerson = persons.find(person => person.name === newName)
+      if (newNumber !== updatePerson.number) {
+        const ok = window.confirm(`${newName} is already in the phonebook, are you sure you want to update number?`)
+        if (ok) {
+          const updatedPerson = {
+            ...updatePerson,
+            number: newNumber
+          }
+          pbService.update(updatePerson.id, updatedPerson).then(returnedPerson => {
+            setPersons(persons.map(person => 
+              person.id !== updatePerson.id ? person : returnedPerson.data
+            ))
+          })
+        }
+      } else {
+        window.alert(`${newName} is already added to phonebook`)
       }
-      setPersons(persons.concat(newPerson))
+    } else {
+      pbService.create(newPerson).then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson.data))
+      })
     }
     setNewName('')
     setNewNumber('')
+  }
+
+  const removeName = (person) => {
+    const ok = window.confirm( `Delete ${person.name}?`)
+    if (ok) {
+      pbService.remove(person.id)
+      setPersons(persons.filter(p => p.id !== person.id))
+    }
   }
 
   const handlePersonChange = (event) => {
@@ -59,7 +84,7 @@ const App = () => {
       <h2>Numbers</h2>
       <div>
         {dispPersons.map(person =>
-          <Person key={person.name} person={person}/>
+          <Person key={person.name} person={person} removeName={removeName}/>
         )}
       </div>
     </div>

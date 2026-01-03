@@ -6,6 +6,7 @@ const app = express()
 
 app.use(express.json())
 app.use(cors())
+app.use(express.static('dist'))
 
 // custom log string
 morgan.token('data', function (request, response) {

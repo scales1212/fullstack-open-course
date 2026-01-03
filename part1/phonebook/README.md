@@ -11,6 +11,8 @@ React
 Node.js
 Express
 VS Code REST Client
+MongoDB Atlas
+Render - to deploy application to internet
 
 # Next Steps
 Style updates - clean up to look more professional

@@ -43,7 +43,7 @@ let persons = [
  * @returns random ID
  */
 const getRandomID = () => {
-  return Math.floor(Math.random() * 1000)
+  return String(Math.floor(Math.random() * 1000))
 }
 
 /**

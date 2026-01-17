@@ -1,7 +1,7 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
-const cors = require('cors')
-
+const Person = require('./models/person')
 const app = express()
 
 app.use(express.json())
@@ -15,29 +15,6 @@ morgan.token('data', function (request, response) {
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
-let persons = [
-  { 
-    "id": "1",
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": "2",
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": "3",
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": "4",
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
-
 /**
  * Helper function to return random id
  * @returns random ID
@@ -50,8 +27,8 @@ const getRandomID = () => {
  * Get INFO data
  */
 app.get('/info', (request, response) => {
-  const len = persons.length
-
+  const personsCount = Person.countDocuments()
+  console.log(personsCount)
   const reqTime = new Date()
   const parts = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -66,57 +43,61 @@ app.get('/info', (request, response) => {
   const get = type => parts.find(p => p.type === type)?.value;
 
   const str = `${get("weekday")} ${get("month")} ${get("day")} ${get("hour")}:${get("minute")} eastern time`
-  response.send(`<div>Number of entries in Phonebook: ${len}</div><div>${str}</div>`)
+  response.send(`<div>Number of entries in Phonebook: ${personsCount}</div><div>${str}</div>`)
 })
 
 /**
  * Get individual resource based on id
  */
 app.get('/api/persons/:id', (request, response) => {
-  const person = persons.find(p => p.id === request.params.id)
-
-  if (person) {
-    response.json(person)
-  }
-  else {
-    response.status(404).end()
-  }
+  Person.findById(request.params.id)
+    .then(person => {
+      response.json(person)
+    })
+    .catch(error => {
+      response.status(404).end()
+    })
 })
 
 /**
  * Add individual resource
  */
-app.post('/api/persons', (request, response) => {
-  const person = request.body
+app.post('/api/persons', async (request, response) => {
+  const body = request.body
 
-  if (!person.name) {
+  if (!body.name) {
     return response.status(400).json({
       error: 'no name'
     })
   }
 
-  if (!person.number) {
+  if (!body.number) {
     return response.status(400).json({
       error: 'no number'
     })
   }
 
-  const names = persons.map(person => person.name)
-  if (names.includes(person.name)) {
+  const exists = await Person.exists({name: body.name})
+  if (exists) {
     return response.status(400).json({
       error: 'name must be unique'
     })
   }
 
-  person.id = getRandomID()
-  persons = persons.concat(person)
-  response.json(person)
+  const person = new Person({
+    name: body.name,
+    number: body.number
+  })
+
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
 })
 
 /**
  * Delete single resouce by id
  */
-app.delete('/api/persons/:id', (request, response) => {
+/* app.delete('/api/persons/:id', (request, response) => {
   const person = persons.find(p => p.id === request.params.id)
 
   if (person) {
@@ -126,16 +107,18 @@ app.delete('/api/persons/:id', (request, response) => {
   else {
     response.status(404).end()
   }
-})
+}) */
 
 /**
  * Get total persons list in JSON
  */
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`listening on port: ${PORT}`)
 })

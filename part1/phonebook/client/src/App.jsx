@@ -60,12 +60,19 @@ const App = () => {
         window.alert(`${newName} is already added to phonebook`)
       }
     } else {
-      pbService.create(newPerson).then(returnedPerson => {
-        setPersons(persons.concat(returnedPerson.data))
-      })
-      setNotificationMessage(
-        `Added ${newPerson.name} to Phonebook`
-      )
+      pbService.create(newPerson)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson.data))
+          setNotificationMessage(
+            `Added ${newPerson.name} to Phonebook`
+          )
+        })
+        .catch(error => {
+          setNotificationMessage(
+            `${error.response.data.error}`
+          )
+        })
+      
       setTimeout(() => {
         setNotificationMessage(null)
       }, 5000)

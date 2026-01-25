@@ -65,7 +65,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 /**
  * Add individual resource
  */
-app.post('/api/persons', async (request, response) => {
+app.post('/api/persons', async (request, response, next) => {
   const body = request.body
 
   if (!body.name) {
@@ -92,9 +92,11 @@ app.post('/api/persons', async (request, response) => {
     number: body.number
   })
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  person.save()
+    .then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
 
 /**
@@ -147,7 +149,10 @@ const errorHandler = (error, request, response, next) => {
   console.log(error.message)
 
   if (error.name == 'CastError') {
-      return response.status(400).send({error: 'Malformed ID'})
+    return response.status(400).send({error: 'Malformed ID'})
+  }
+  else if (error.name == 'ValidationError') {
+    return response.status(400).json({error: error.message})
   }
 
   next(error)

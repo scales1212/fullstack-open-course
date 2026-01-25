@@ -9,19 +9,11 @@ app.use(express.static('dist'))
 
 // custom log string
 morgan.token('data', function (request, response) {
-  if (request.method === "POST") {
+  if (request.method === 'POST') {
     return JSON.stringify(request.body)
   }
 })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
-
-/**
- * Helper function to return random id
- * @returns random ID
- */
-const getRandomID = () => {
-  return String(Math.floor(Math.random() * 1000))
-}
 
 /**
  * Get INFO data
@@ -30,19 +22,19 @@ app.get('/info', (request, response) => {
   const personsCount = Person.countDocuments()
   console.log(personsCount)
   const reqTime = new Date()
-  const parts = new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+  const parts = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
     hour12: false,
-    timeZone: "America/New_York"
-  }).formatToParts(reqTime);
+    timeZone: 'America/New_York'
+  }).formatToParts(reqTime)
 
-  const get = type => parts.find(p => p.type === type)?.value;
+  const get = type => parts.find(p => p.type === type)?.value
 
-  const str = `${get("weekday")} ${get("month")} ${get("day")} ${get("hour")}:${get("minute")} eastern time`
+  const str = `${get('weekday')} ${get('month')} ${get('day')} ${get('hour')}:${get('minute')} eastern time`
   response.send(`<div>Number of entries in Phonebook: ${personsCount}</div><div>${str}</div>`)
 })
 
@@ -113,7 +105,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
       }
     })
     .catch(error => next(error))
-    }
+}
 )
 
 /**

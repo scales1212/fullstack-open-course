@@ -49,14 +49,17 @@ app.get('/info', (request, response) => {
 /**
  * Get individual resource based on id
  */
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id)
     .then(person => {
-      response.json(person)
+      if (person) {
+        response.json(person)
+      }
+      else {
+        response.status(404).end()
+      }
     })
-    .catch(error => {
-      response.status(404).end()
-    })
+    .catch(error => next(error))
 })
 
 /**
@@ -97,17 +100,39 @@ app.post('/api/persons', async (request, response) => {
 /**
  * Delete single resouce by id
  */
-/* app.delete('/api/persons/:id', (request, response) => {
-  const person = persons.find(p => p.id === request.params.id)
+app.delete('/api/persons/:id', (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then(person => {
+      if (person) {
+        response.status(204).end()
+      }
+      else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
+    }
+)
 
-  if (person) {
-    persons = persons.filter(p => p.id !== person.id)
-    response.status(204).end()
-  }
-  else {
-    response.status(404).end()
-  }
-}) */
+/**
+ * Update entry by id
+ */
+app.put('/api/persons/:id', (request, response, next) => {
+  const newNumber = request.body.number
+  Person.findById(request.params.id)
+    .then(person => {
+      if (!person) {
+        return response.status(404).end()
+      }
+
+      person.number = newNumber
+
+      return person.save().then(updatedContact => {
+        response.json(updatedContact)
+      })
+    })
+    .catch(error => next(error))
+})
 
 /**
  * Get total persons list in JSON
@@ -117,6 +142,18 @@ app.get('/api/persons', (request, response) => {
     response.json(persons)
   })
 })
+
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message)
+
+  if (error.name == 'CastError') {
+      return response.status(400).send({error: 'Malformed ID'})
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {

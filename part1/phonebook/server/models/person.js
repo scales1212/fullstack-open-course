@@ -4,7 +4,7 @@ const url = process.env.MONGODB_URI
 
 mongoose.set('strictQuery',false)
 mongoose.connect(url, { family: 4 })
-  .then(result => {
+  .then(_result => {
     console.log('Connected to MongoDB')
   })
   .catch(error => {

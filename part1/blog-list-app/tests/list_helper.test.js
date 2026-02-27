@@ -85,6 +85,7 @@ describe('totalLikes testing', () => {
 
     assert.strictEqual(result, 1010)
   })
+})
 
 describe('favoriteBlog testing', () => {
   test('test favoriteBlog on list of 2', () => {
@@ -107,4 +108,17 @@ describe('mostBlogs testing', () => {
     assert.deepStrictEqual(result, answer)
   })
 })
+
+describe('mostLikes testing', () => {
+  test('test mostLikes on list of 3', () => {
+    const result = listHelper.mostLikes(listThreeBlogs)
+
+    const answer = 
+    {
+      "author": "Mary Shelley",
+      "likes": 1050
+    }
+
+    assert.deepStrictEqual(result, answer)
+  })
 })

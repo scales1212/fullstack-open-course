@@ -23,7 +23,7 @@ const favoriteBlog = (blogs) => {
 /**
  * reduce returns obj, so needed to call Object.entries to return arr for map
  * @param {*} blogs 
- * @returns 
+ * @returns author with most number blogs
  */
 const mostBlogs = (blogs) => {
   const most = Object.entries(blogs.reduce(((list, blog) => {
@@ -41,13 +41,34 @@ const mostBlogs = (blogs) => {
   .reduce((max, curr) => {
     return curr.blogs > max.blogs ? curr : max
   })
-  
+
  return most
+}
+
+const mostLikes = (blogs) => {
+  const most = Object.entries(blogs.reduce(((list, blog) => {
+    list[blog.author] = list[blog.author] + blog.likes || blog.likes
+    return list
+  }), {}))
+  .map(entry => {
+    console.log(entry[0])
+    console.log(entry[1])
+    return {
+      "author": entry[0],
+      "likes": entry[1]
+    }
+  })
+  .reduce((max, curr) => {
+    return curr.likes > max.likes ? curr : max
+  })
+
+  return most
 }
 
 module.exports = {
   dummy,
   totalLikes,
   favoriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 }
